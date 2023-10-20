@@ -87,7 +87,7 @@ class EasyApplyBot:
         self.blackListTitles = blackListTitles
         self.companysize = companysize
         self.remote = remote
-        self.goodfitonly=goodfitonly
+        self.goodfitonly = goodfitonly
         self.start_linkedin(username, password)
 
     def get_appliedIDs(self, filename):
@@ -249,15 +249,15 @@ class EasyApplyBot:
                         textcompanysize = self.get_company_employee_size()
                         log.info("Company size "+str(textcompanysize))
                         res = False
-                        goodfittext=False
+                        goodfittext = False
                         for l in self.companysize:
                             if l in textcompanysize:
                                 res = True
                         if "good fit" in textcompanysize or "You have a preferred" in textcompanysize:
                             log.info("Good Fit available")
-                            goodfittext=True
+                            goodfittext = True
                         else:
-                            log.info("Not a Good Fit")    
+                            log.info("Not a Good Fit")
                         companyname = self.get_company_name()
                         log.info("Company Name"+str(companyname))
                         companyrating = GetCompanyRating(companyname)
@@ -273,7 +273,7 @@ class EasyApplyBot:
                             res = True
                         if self.goodfitonly is True and goodfittext is False:
                             res = False
-                         
+
                         if button is not False and res is True:
                             if any(word in self.browser.title for word in blackListTitles):
                                 log.info(
@@ -397,6 +397,8 @@ class EasyApplyBot:
             time.sleep(random.uniform(1.5, 2.5))
             next_locater = (By.CSS_SELECTOR,
                             "button[aria-label='Continue to next step']")
+            resume_choose = (By.CSS_SELECTOR,
+                             "button[aria-label='Choose Resume']")
             review_locater = (By.CSS_SELECTOR,
                               "button[aria-label='Review your application']")
             submit_locater = (By.CSS_SELECTOR,
@@ -411,25 +413,31 @@ class EasyApplyBot:
 
             submitted = False
             while True:
-
+                # Choose Resume
+                if is_present(resume_choose):
+                    choosebutton = self.browser.find_element(By.CSS_SELECTOR,
+                                                             "button[aria-label='Choose Resume']")
+                    choosebutton.click()
                 # Upload Cover Letter if possible
-                if is_present(upload_locator):
+                # if is_present(upload_locator):
+                #     try:
+                #         input_buttons = self.browser.find_elements(upload_locator[0],
+                #                                                    upload_locator[1])
+                #         for input_button in input_buttons:
+                #             parent = input_button.find_element(By.XPATH, "..")
+                #             sibling = parent.find_element(
+                #                 By.XPATH, "preceding-sibling::*")
+                #             grandparent = sibling.find_element(By.XPATH, "..")
+                #             for key in self.uploads.keys():
+                #                 sibling_text = sibling.text
+                #                 gparent_text = grandparent.text
+                #                 if key.lower() in sibling_text.lower() or key in gparent_text.lower():
+                #                     input_button.send_keys(self.uploads[key])
+                #     except Exception as e:
+                #         log.info(e)
 
-                    input_buttons = self.browser.find_elements(upload_locator[0],
-                                                               upload_locator[1])
-                    for input_button in input_buttons:
-                        parent = input_button.find_element(By.XPATH, "..")
-                        sibling = parent.find_element(
-                            By.XPATH, "preceding-sibling::*")
-                        grandparent = sibling.find_element(By.XPATH, "..")
-                        for key in self.uploads.keys():
-                            sibling_text = sibling.text
-                            gparent_text = grandparent.text
-                            if key.lower() in sibling_text.lower() or key in gparent_text.lower():
-                                input_button.send_keys(self.uploads[key])
-
-                    # input_button[0].send_keys(self.cover_letter_loctn)
-                    time.sleep(random.uniform(4.5, 6.5))
+                #     # input_button[0].send_keys(self.cover_letter_loctn)
+                #     time.sleep(random.uniform(4.5, 6.5))
 
                 # Click Next or submitt button if possible
                 button = None
@@ -476,23 +484,24 @@ class EasyApplyBot:
                                             'jobs-easy-apply-form-section__grouping')
         if len(frm_el) > 0:
             for el in frm_el:
+                # Txt Field Check
                 try:
                     question = el.find_element(By.CLASS_NAME,
-                                               'jobs-easy-apply-form-element')
-                    question_text = question.find_element(By.CLASS_NAME,
-                                                          'fb-form-element-label').text.lower()
+                                               'artdeco-text-input--label')
+                    question_text = el.find_element(By.CLASS_NAME,
+                                                    'artdeco-text-input--input').text.lower()
 
                     txt_field_visible = False
-                    txt_field = question
+                    txt_field = question_text
                     try:
-                        txt_field = question.find_element(By.CLASS_NAME,
-                                                          'fb-single-line-text__input')
+                        txt_field = el.find_element(By.CLASS_NAME,
+                                                    'artdeco-text-input--input')
 
                         txt_field_visible = True
                     except:
                         try:
-                            txt_field = question.find_element(By.CLASS_NAME,
-                                                              'fb-textarea')
+                            txt_field = el.find_element(By.CLASS_NAME,
+                                                        'fb-textarea')
 
                             txt_field_visible = True
                         except:
@@ -512,8 +521,120 @@ class EasyApplyBot:
                     txt_field_text = txt_field.get_attribute('value')
                     if txt_field_text == '':
                         txt_field.send_keys(to_enter)
-                except:
-                    pass
+                except Exception as e:
+                    break
+                # # Dropdown check
+                # try:
+                #     question = el.find_element(By.CLASS_NAME,
+                #                                'fb-dash-form-element__label')
+                #     question_text = el.find_element(By.CLASS_NAME,
+                #                                     'fb-dash-form-element__label').text.lower()
+
+                #     dropdown_field = el.find_element(By.Name,
+                #                                      'select')
+
+                #     select = Select(dropdown_field)
+
+                #     options = [options.text for options in select.options]
+
+                #     if 'english' in question_text:
+                #         proficiency = "Yes"
+
+                #         for language in self.languages:
+                #             if language.lower() in question_text:
+                #                 proficiency = self.languages[language]
+                #                 break
+
+                #         self.select_dropdown(dropdown_field, proficiency)
+                #     elif 'country code' in question_text:
+                #         self.select_dropdown(
+                #             dropdown_field, self.personal_info['Phone Country Code'])
+                #     elif 'north korea' in question_text:
+
+                #         choice = ""
+
+                #         for option in options:
+                #             if 'no' in option.lower():
+                #                 choice = option
+
+                #         if choice == "":
+                #             choice = options[len(options) - 1]
+
+                #         self.select_dropdown(dropdown_field, choice)
+                #     elif 'sponsor' in question_text:
+                #         answer = self.get_answer('requireVisa')
+
+                #         choice = ""
+
+                #         for option in options:
+                #             if answer == 'yes':
+                #                 choice = option
+                #             else:
+                #                 if 'no' in option.lower():
+                #                     choice = option
+
+                #         if choice == "":
+                #             choice = options[len(options) - 1]
+
+                #         self.select_dropdown(dropdown_field, choice)
+                #     elif 'authorized' in question_text or 'authorised' in question_text:
+                #         answer = self.get_answer('legallyAuthorized')
+
+                #         choice = ""
+
+                #         for option in options:
+                #             if answer == 'yes':
+                #                 # find some common words
+                #                 choice = option
+                #             else:
+                #                 if 'no' in option.lower():
+                #                     choice = option
+
+                #         if choice == "":
+                #             choice = options[len(options) - 1]
+
+                #         self.select_dropdown(dropdown_field, choice)
+                #     elif 'citizenship' in question_text:
+                #         answer = self.get_answer('legallyAuthorized')
+
+                #         choice = ""
+
+                #         for option in options:
+                #             if answer == 'yes':
+                #                 if 'no' in option.lower():
+                #                     choice = option
+
+                #         if choice == "":
+                #             choice = options[len(options) - 1]
+
+                #         self.select_dropdown(dropdown_field, choice)
+                #     elif 'gender' in question_text or 'veteran' in question_text or 'race' in question_text or 'disability' in question_text or 'latino' in question_text:
+
+                #         choice = ""
+
+                #         for option in options:
+                #             if 'prefer' in option.lower() or 'decline' in option.lower() or 'don\'t' in option.lower() or 'specified' in option.lower() or 'none' in option.lower():
+                #                 choice = option
+
+                #         if choice == "":
+                #             choice = options[len(options) - 1]
+
+                #         self.select_dropdown(dropdown_field, choice)
+                #     else:
+                #         choice = ""
+
+                #         for option in options:
+                #             if 'yes' in option.lower():
+                #                 choice = option
+
+                #         if choice == "":
+                #             choice = options[len(options) - 1]
+
+                #         self.select_dropdown(dropdown_field, choice)
+                #     continue
+                # except Exception as e:
+                #     print(e)
+                #     pass
 
     def load_page(self, sleep=1):
         scroll_page = 0
@@ -541,7 +662,7 @@ class EasyApplyBot:
         pyautogui.press('esc')
 
     def next_jobs_page(self, position, location, jobs_per_page):
-        JObURL = "https://www.linkedin.com/jobs/search/?f_LF=f_AL&keywords=" + str(urllib.parse.quote(position)) + \
+        JObURL = "https://www.linkedin.com/jobs/search/?f_AL=true&keywords=" + str(urllib.parse.quote(position)) + \
             location + "&start=" + str(jobs_per_page)+"&refresh=true&sortBy=DD"
         if self.remote == True:
             JObURL = JObURL+"&f_WT=2"
