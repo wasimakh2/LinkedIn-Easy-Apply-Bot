@@ -379,7 +379,7 @@ class EasyApplyBot:
     def get_easy_apply_button(self):
         try:
             button = self.browser.find_elements(By.XPATH,
-                                                '//button[contains(@class, "jobs-apply")]/span[1]'
+                                                '//div[contains(@class, "jobs-s-apply") and contains(@class, "jobs-s-apply--fadein") and contains(@class, "inline-flex") and contains(@class, "mr2")]/div/button/span[text()="Easy Apply"]'
                                                 )
 
             EasyApplyButton = button[0]
@@ -395,6 +395,9 @@ class EasyApplyBot:
 
         try:
             time.sleep(random.uniform(1.5, 2.5))
+            mobilenumber_locator=(By.XPATH,
+                                                '(//input[contains(@class, "artdeco-text-input--input") and contains(@id, "phoneNumber-nationalNumber") and @type="text"])[1]'
+                                                )
             next_locater = (By.CSS_SELECTOR,
                             "button[aria-label='Continue to next step']")
             resume_choose = (By.CSS_SELECTOR,
@@ -405,15 +408,24 @@ class EasyApplyBot:
                               "button[aria-label='Submit application']")
             submit_application_locator = (By.CSS_SELECTOR,
                                           "button[aria-label='Submit application']")
-            error_locator = (By.CSS_SELECTOR,
-                             "p[data-test-form-element-error-message='true']")
+            error_locator = (By.XPATH,
+                             '//div[contains(@id, "-error")]')
             upload_locator = (By.CSS_SELECTOR, "input[name='file']")
             follow_locator = (
                 By.CSS_SELECTOR, "label[for='follow-company-checkbox']")
 
             submitted = False
             while True:
-                # Choose Resume
+                if is_present(mobilenumber_locator):
+                    # Set the value of the input field
+                        
+                                    # Choose Resume
+                        inputext = self.browser.find_elements(By.XPATH,
+                                                '(//input[contains(@class, "artdeco-text-input--input") and contains(@id, "phoneNumber-nationalNumber") and @type="text"])[1]'
+                                                )
+                        inputext[0].clear()
+                        inputext[0].send_keys('9718742936')
+
                 if is_present(resume_choose):
                     choosebutton = self.browser.find_element(By.CSS_SELECTOR,
                                                              "button[aria-label='Choose Resume']")
@@ -448,11 +460,12 @@ class EasyApplyBot:
                         button = self.wait.until(
                             EC.element_to_be_clickable(button_locator))
                     self.additional_questions()
+                    
                     if is_present(error_locator):
                         for element in self.browser.find_elements(error_locator[0],
                                                                   error_locator[1]):
                             text = element.text
-                            if "Please enter a valid answer" in text:
+                            if "enter a" in text:
                                 button = None
                                 break
                     if button:
