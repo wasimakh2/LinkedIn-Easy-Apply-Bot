@@ -531,6 +531,7 @@ class EasyApplyBot:
                     for txt_field in numeric_elements:
                         txt_field_text = txt_field.get_attribute('value')
                         if txt_field_text == '':
+                            to_enter = '1'
                             txt_field.send_keys(to_enter)
                 except Exception as e:
                     # Handle any exceptions or break out of the loop
