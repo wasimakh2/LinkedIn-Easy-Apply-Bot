@@ -462,6 +462,7 @@ class EasyApplyBot:
                     self.additional_questions()
 
                     if is_present(error_locator):
+
                         for element in self.browser.find_elements(error_locator[0],
                                                                   error_locator[1]):
                             text = element.text
@@ -469,6 +470,9 @@ class EasyApplyBot:
                                 button = None
                                 break
                             if "make a" in text:
+                                button = None
+                                break
+                            if text != '':
                                 button = None
                                 break
                     if button:
@@ -506,8 +510,9 @@ class EasyApplyBot:
                         By.XPATH, '//select[contains(@id, "text-entity-list-form-component-formElement")]')
 
                     # Iterate through the found elements and click the first one
-                    for yes_el in yes_elements:
-                        yes_el.select_by_value('Yes')
+                    yes_el = Select(driver.find_element_by_xpath(
+                        '//select[contains(@id, "text-entity-list-form-component-formElement")]'))
+                    yes_el.select_by_value('Yes')
                 except Exception as e:
                     # Handle any exceptions or break out of the loop
                     print("Error:", e)
