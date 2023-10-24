@@ -395,9 +395,9 @@ class EasyApplyBot:
 
         try:
             time.sleep(random.uniform(1.5, 2.5))
-            mobilenumber_locator=(By.XPATH,
-                                                '(//input[contains(@class, "artdeco-text-input--input") and contains(@id, "phoneNumber-nationalNumber") and @type="text"])[1]'
-                                                )
+            mobilenumber_locator = (By.XPATH,
+                                    '(//input[contains(@class, "artdeco-text-input--input") and contains(@id, "phoneNumber-nationalNumber") and @type="text"])[1]'
+                                    )
             next_locater = (By.CSS_SELECTOR,
                             "button[aria-label='Continue to next step']")
             resume_choose = (By.CSS_SELECTOR,
@@ -418,13 +418,13 @@ class EasyApplyBot:
             while True:
                 if is_present(mobilenumber_locator):
                     # Set the value of the input field
-                        
-                                    # Choose Resume
-                        inputext = self.browser.find_elements(By.XPATH,
-                                                '(//input[contains(@class, "artdeco-text-input--input") and contains(@id, "phoneNumber-nationalNumber") and @type="text"])[1]'
-                                                )
-                        inputext[0].clear()
-                        inputext[0].send_keys('9718742936')
+
+                    # Choose Resume
+                    inputext = self.browser.find_elements(By.XPATH,
+                                                          '(//input[contains(@class, "artdeco-text-input--input") and contains(@id, "phoneNumber-nationalNumber") and @type="text"])[1]'
+                                                          )
+                    inputext[0].clear()
+                    inputext[0].send_keys('9718742936')
 
                 if is_present(resume_choose):
                     choosebutton = self.browser.find_element(By.CSS_SELECTOR,
@@ -460,12 +460,15 @@ class EasyApplyBot:
                         button = self.wait.until(
                             EC.element_to_be_clickable(button_locator))
                     self.additional_questions()
-                    
+
                     if is_present(error_locator):
                         for element in self.browser.find_elements(error_locator[0],
                                                                   error_locator[1]):
                             text = element.text
                             if "enter a" in text:
+                                button = None
+                                break
+                            if "make a" in text:
                                 button = None
                                 break
                     if button:
@@ -497,6 +500,41 @@ class EasyApplyBot:
                                             'jobs-easy-apply-form-section__grouping')
         if len(frm_el) > 0:
             for el in frm_el:
+                try:
+                    # Find all "Yes" radio button options
+                    yes_elements = self.browser.find_elements(
+                        By.XPATH, '//select[contains(@id, "text-entity-list-form-component-formElement")]')
+
+                    # Iterate through the found elements and click the first one
+                    for yes_el in yes_elements:
+                        yes_el.select_by_value('Yes')
+                except Exception as e:
+                    # Handle any exceptions or break out of the loop
+                    print("Error:", e)
+                try:
+                    # Find all "Yes" radio button options
+                    yes_elements = self.browser.find_elements(
+                        By.XPATH, '//input[@data-test-text-selectable-option__input="Yes"]')
+
+                    # Iterate through the found elements and click the first one
+                    for yes_el in yes_elements:
+                        yes_el.click()
+                except Exception as e:
+                    # Handle any exceptions or break out of the loop
+                    print("Error:", e)
+                try:
+                    # Find all "Yes" radio button options
+                    numeric_elements = self.browser.find_elements(
+                        By.XPATH, '//input[contains(@id, "single-line-text-form-component-formElement")]')
+
+                    # Iterate through the found elements and click the first one
+                    for txt_field in numeric_elements:
+                        txt_field_text = txt_field.get_attribute('value')
+                        if txt_field_text == '':
+                            txt_field.send_keys(to_enter)
+                except Exception as e:
+                    # Handle any exceptions or break out of the loop
+                    print("Error:", e)
                 # Txt Field Check
                 try:
                     question = el.find_element(By.CLASS_NAME,
@@ -534,8 +572,18 @@ class EasyApplyBot:
                     txt_field_text = txt_field.get_attribute('value')
                     if txt_field_text == '':
                         txt_field.send_keys(to_enter)
+                    try:
+                        # Locate the dropdown element using XPath with contains
+                        dropdown = Select(driver.find_element_by_xpath(
+                            '//select[contains(@id, "text-entity-list-form-component-formElement")]'))
+
+                        # Select "Yes" from the dropdown
+                        dropdown.select_by_value('Yes')
+                    except Exception as e:
+                        pass
                 except Exception as e:
                     break
+
                 # # Dropdown check
                 # try:
                 #     question = el.find_element(By.CLASS_NAME,
