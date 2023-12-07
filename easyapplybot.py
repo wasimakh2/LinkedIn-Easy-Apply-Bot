@@ -25,9 +25,13 @@ import re
 import yaml
 from datetime import datetime, timedelta
 from CompanyRating import GetCompanyRating
-log = logging.getLogger(__name__)
-driver = webdriver.Chrome(ChromeDriverManager().install())
+from selenium.webdriver.chrome.service import Service
+service = Service()
 
+log = logging.getLogger(__name__)
+options = webdriver.ChromeOptions()
+
+driver = webdriver.Chrome(service=service,options=options)
 
 def setupLogger():
     dt = datetime.strftime(datetime.now(), "%m_%d_%y %H_%M_%S ")
